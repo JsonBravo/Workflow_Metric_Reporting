@@ -11,6 +11,7 @@ Every industry has workflows, and this script leverages the four (4) most basic,
 Input (Excel Spreadsheet): <br>
 <img width="574" height="376" alt="image" src="https://github.com/user-attachments/assets/f7e14857-6eab-4fc1-880e-84bcbcdde94b" />
 <br><br>
+
 Script (see `period_reporting_notebook`): <br>
 `file_location = xlsx_files[0]` <br>
 `report_title = "Mock General Issues"` <br>
