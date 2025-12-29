@@ -2,9 +2,9 @@
 <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/d4c25232-ee14-4a1d-8679-b149305c1e9d" />
 
 Here I provide a Python script that can be used to assist in visualizing and reporting general workflow metrics. 
-<br>
+<br><br>
 Every industry has workflows, and this script leverages the four (4) most basic, universal aspects: workflow ID, workflow title, starting datetimes, and completed datetimes.
-<br>
+<br><br>
 EXAMPLE:
 <br>
 Input (Excel Spreadsheet): <br>
@@ -20,89 +20,16 @@ Script (see `period_reporting_notebook`): <br>
 Output (see `period_reporting_notebook`): <br>
 <br>
  Mock General Issues<br>
-
-Key Workflows at the end of Period 2024Q1:<br>
-+--------------------+----------------------------------------------+--------------+<br>
-|                    | Workflow                                     |   Age (days) |<br>
-+====================+==============================================+==============+<br>
-| Oldest Workflow    | GI-001: Supply chain delay investigation     |           87 |<br>
-| Closed:            |                                              |              |<br>
-+--------------------+----------------------------------------------+--------------+<br>
-| Oldest Workflow    | GI-011: Packaging defect investigation       |           38 |<br>
-| Remaining Open:    |                                              |              |<br>
-+--------------------+----------------------------------------------+--------------+<br>
-| Fastest / Youngest | GI-010: Customer service response time study |           46 |<br>
-| Workflow Closed:   |                                              |              |<br>
-+--------------------+----------------------------------------------+--------------+<br>
+<img width="593" height="206" alt="image" src="https://github.com/user-attachments/assets/6e7a93b5-6761-4ab9-a3d4-51386a6cf669" />
 <br>
-Key Workflows at the end of Period 2024Q2:<br>
-+--------------------+---------------------------------------------+--------------+<br>
-|                    | Workflow                                    |   Age (days) |<br>
-+====================+=============================================+==============+<br>
-| Oldest Workflow    | GI-011: Packaging defect investigation      |          129 |<br>
-| Closed:            |                                             |              |<br>
-+--------------------+---------------------------------------------+--------------+<br>
-| Oldest Workflow    | GI-028: Maintenance backlog deep-dive       |           41 |<br>
-| Remaining Open:    |                                             |              |<br>
-+--------------------+---------------------------------------------+--------------+<br>
-| Fastest / Youngest | GI-027: Product spec variance investigation |           47 |<br>
-| Workflow Closed:   |                                             |              |<br>
-+--------------------+---------------------------------------------+--------------+<br>
+<img width="594" height="201" alt="image" src="https://github.com/user-attachments/assets/033087b6-79ab-4876-bddf-01c233f1fd13" />
 <br>
-Key Workflows at the end of Period 2024Q3:<br>
-+--------------------+--------------------------------------------+--------------+<br>
-|                    | Workflow                                   |   Age (days) |<br>
-+====================+============================================+==============+<br>
-| Oldest Workflow    | GI-028: Maintenance backlog deep-dive      |          133 |<br>
-| Closed:            |                                            |              |<br>
-+--------------------+--------------------------------------------+--------------+<br>
-| Oldest Workflow    | GI-043: Unexpected customer churn analysis |           51 |<br>
-| Remaining Open:    |                                            |              |<br>
-+--------------------+--------------------------------------------+--------------+<br>
-| Fastest / Youngest | GI-045: Supplier performance audit         |           42 |<br>
-| Workflow Closed:   |                                            |              |<br>
-+--------------------+--------------------------------------------+--------------+<br>
-
-Key Workflows at the end of Period 2024Q4:
-+--------------------+--------------------------------------------+--------------+<br>
-|                    | Workflow                                   |   Age (days) |<br>
-+====================+============================================+==============+<br>
-| Oldest Workflow    | GI-043: Unexpected customer churn analysis |          143 |<br>
-| Closed:            |                                            |              |<br>
-+--------------------+--------------------------------------------+--------------+<br>
-| Oldest Workflow    | GI-060: Unplanned outage post-mortem       |           59 |<br>
-| Remaining Open:    |                                            |              |<br>
-+--------------------+--------------------------------------------+--------------+<br>
-| Fastest / Youngest | GI-059: System access provisioning issues  |           64 |<br>
-| Workflow Closed:   |                                            |              |<br>
-+--------------------+--------------------------------------------+--------------+<br>
-
-Key Workflows at the end of Period 2025Q1:<br>
-+--------------------+---------------------------------------+--------------+<br>
-|                    | Workflow                              |   Age (days) |<br>
-+====================+=======================================+==============+<br>
-| Oldest Workflow    | GI-060: Unplanned outage post-mortem  |          149 |<br>
-| Closed:            |                                       |              |<br>
-+--------------------+---------------------------------------+--------------+<br>
-| Oldest Workflow    | GI-081: Shipping documentation errors |           49 |<br>
-| Remaining Open:    |                                       |              |<br>
-+--------------------+---------------------------------------+--------------+<br>
-| Fastest / Youngest | GI-080: EHS internal audit follow-up  |           55 |<br>
-| Workflow Closed:   |                                       |              |<br>
-+--------------------+---------------------------------------+--------------+<br>
+<img width="583" height="200" alt="image" src="https://github.com/user-attachments/assets/1557e9b4-b936-4b0e-92c9-2081fa6b7302" />
 <br>
-Key Workflows at the end of Period 2025Q2:<br>
-+--------------------+-----------------------------------------+--------------+<br>
-|                    | Workflow                                |   Age (days) |<br>
-+====================+=========================================+==============+<br>
-| Oldest Workflow    | GI-081: Shipping documentation errors   |          140 |<br>
-| Closed:            |                                         |              |<br>
-+--------------------+-----------------------------------------+--------------+<br>
-| Oldest Workflow    | GI-083: Declining throughput in plant 2 |          130 |<br>
-| Remaining Open:    |                                         |              |<br>
-+--------------------+-----------------------------------------+--------------+<br>
-| Fastest / Youngest | GI-098: Customer onboarding errors      |           55 |<br>
-| Workflow Closed:   |                                         |              |<br>
-+--------------------+-----------------------------------------+--------------+<br>
+<img width="586" height="205" alt="image" src="https://github.com/user-attachments/assets/bcb321f8-8367-4027-a427-e3b1bfe97e84" />
+<br>
+<img width="549" height="203" alt="image" src="https://github.com/user-attachments/assets/2f805f9a-c7e1-4e73-9577-0562212ac707" />
+<br>
+<img width="562" height="207" alt="image" src="https://github.com/user-attachments/assets/3cb49e68-2a57-44c9-a85f-6f6de84f5a36" />
 <br>
 <img width="989" height="590" alt="image" src="https://github.com/user-attachments/assets/111c5d0e-d4d6-4c52-ab20-f4e3b3356a0c" />
