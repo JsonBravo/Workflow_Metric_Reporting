@@ -32,6 +32,7 @@ Output (see `period_reporting_notebook`): <br>
 <img width="989" height="590" alt="image" src="https://github.com/user-attachments/assets/111c5d0e-d4d6-4c52-ab20-f4e3b3356a0c" />
 <br> 
 `print(df)`
+<br> 
 <img width="575" height="164" alt="image" src="https://github.com/user-attachments/assets/cdbac50a-41d9-467a-803d-d05c1317cab8" />
 
 
