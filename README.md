@@ -18,7 +18,7 @@ Script (see `period_reporting_notebook`): <br>
 
 <br>
 Output (see `period_reporting_notebook`): <br>
-<br>
+
  Mock General Issues<br>
 <img width="593" height="206" alt="image" src="https://github.com/user-attachments/assets/6e7a93b5-6761-4ab9-a3d4-51386a6cf669" />
 <br>
