@@ -13,7 +13,7 @@ Input (Excel Spreadsheet): <br>
 <br><br>
 
 Script (see `period_reporting_notebook`): <br>
-<img width="977" height="183" alt="image" src="https://github.com/user-attachments/assets/4e71881c-bb1d-4e8f-8469-159b6281967a" />
+<img width="984" height="171" alt="image" src="https://github.com/user-attachments/assets/52c3b5e9-cbe2-4fd0-8127-9204f02f265a" />
  <br>
 `file_location = xlsx_files[0]` <br>
 `report_title = "Mock General Issues"` <br>
