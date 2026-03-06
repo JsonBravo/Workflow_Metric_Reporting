@@ -1,0 +1,6 @@
+#ignore real data
+data/
+
+#ignore any real report notebooks
+*_report.ipynb
+
