@@ -1,6 +1,10 @@
 #ignore real data
 data/
 
-#ignore any real report notebooks
-*_report.ipynb
+#ignore any "real" and/or "test" report notebooks (keep "display / example" notebooks)
+*_report.ipynb 
+*_test.ipynb
+
+
+
 

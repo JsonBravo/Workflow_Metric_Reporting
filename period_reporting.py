@@ -43,236 +43,214 @@ def plot_period_workflow_metrics(df, workflow_type = '[Describe]', period_variab
     plt.tight_layout()
     plt.show()
 
-def period_workflows_reporter(xlsx_file_location ='.', period_code = 'Q', age_code = 'D', selected_standard_columns = ['Key', 'Title/ Short Description', 'Date Started', 'Completion Date'], report_title = None, top_n_periods = None, verbose = True):
+def period_workflows_reporter(
+    xlsx_file_location='.',
+    period_code='Q',             # pandas frequency alias (e.g. 'D','W','W-MON','M','Q','Y',etc.)
+    age_code='D',
+    selected_standard_columns=None,
+    report_title=None,
+    top_n_periods=None,
+    verbose=True,
+    week_anchor='MON'            # optional day name to anchor weeks when using 'W'
+):
     """
-    Quick Reference Example:
-    period_workflows_reporter(xlsx_file_location ='.', 
-                              period_code = 'Q', age_code = 'D', 
-                              selected_standard_columns = ['Key', 'Title/ Short Description', 'Date Started', 'Completion Date'], 
-                              top_n_periods = None, verbose = True)
+    This is a period workflow reporting function able to handle arbitrary time periods.
+
+    The function allows for any alias recognised by :func:`pandas.Period` may be supplied.  
+    The special ``week_anchor`` argument allows callers to request e.g. ``'MON'``
+    semantics without needing to know the pandas notation.
+
+    Parameters
+    ----------
+    xlsx_file_location : str
+        Path to the Excel workbook containing references to the four standard columns 
+        (order of the references matter)
+            1. ``Key``
+            2. ``Title/ Short Description``
+            3. ``Date Started``
+            4. ``Completion Date``
+        If ``selected_standard_columns`` is omitted it defaults to this list (see below).
     
-    DOCUMENTATION:
-    Given the following six (6) inputs:
-        
-        INPUTS:
-            1. xlsx_file_location: A path to a single xlsx file to read in which has four (4) columns:
-                
-                COLUMNS:
-                    'Key': a workflow key 
-                    'Title/ Short Description': a workflow title or short description 
-                    'Date Started': a workflow startdate 
-                    'Completion Date': a workflow completion date (can be blank)
-            
-            2. period_code: A single character code to define the reporting period duration. See code options below 
-            3. age_code =  A single character code to define workflow ages.
-            
-                CODES:              Description                 STATUS
-                                    
-                    B               business day frequency      [Not Implemented]
-                    D               calendar day frequency      [Implemented for `age_code` only]
-                    W               weekly frequency            [Not Implemented]
-                    M               monthly frequency           [Not Implemented]
-                    Q               quarterly frequency         [Implemented for `period_code` only]
-                    Y               yearly frequency            [Not Implemented]
-                    h               hourly frequency            [Not Implemented]
-                    min             minutely frequency          [Not Implemented]
-                    s               secondly frequency          [Not Implemented]
-                
-                #As you may note, not all Codes have been implemented at this time...
-                #Read more about period aliases through the following link:
-                    https://pandas.pydata.org/docs/user_guide/timeseries.html#period-aliases:~:text=the%20end_date)-,Period%20aliases,-%23
-                
-            4. selected_standard_columns: Expects a list of the four (4) columns in following order:
-                    ['Key', 'Title/ Short Description', 'Date Started', 'Completion Date']
-                    
-            5. top_n_periods: If provided, report will be limited to only the top 'n' periods in the given xlsx file data 
-                (NOTE: will throw error if 'n' is greater than the total number of periods available in given xlsx data)
-                
-            6. verbose: If `True` then will print the following to console in a verbose report (this report is not returned, just printed):
-                
-                VERBOSE REPORT:
-                    
-                    For each period, will print the 'Key', 'Description', and 'Age' of the following:
-                        -Oldest Workflow that was closed
-                        -Oldest Workflow that remains open
-                        -Fastest / youngest Worklflow closed
-                    
-                    Will print a plot of the xlsx data showing the following for each period:
-                        - Count of Started Workflows During Period (yellow bar)
-                        - Count of Completed Workflows During Period (green bar)
-                        - Count of Workflows Open at the End of a Period (red bar)
-                        - Mean average age of workflows in the period (black line)
-                        - Median age of workflows in the period (gray line)
+    period_code : str
+        Pandas frequency alias used for ``.dt.to_period()``.  
+        Examples:
+            ``'D'`` (calendar day)
+            ``'W'`` (weeks ending on Sunday)
+            ``'W-MON'`` (weeks ending on Monday)
+            ``'M'`` (monthly) 
+            ``'Q'`` (quarterly)
+            ``'Y'`` (yearly)
     
-    ... This method returns the following DataFrame:
-        
-        RETURNS:
-            
-            1. report_df: A DataFrame with the following columns:
-                
-                COLUMNS:
-                    
-                    'Period':The period value.
-                    'Open at Start': A count of open workflows at the start of the period.
-                    'Started During': A count of all started workflows in the period.
-                    'Completed During': A count of all completed workflows in the period.
-                    'Open at End': A count of all workflows remaining open at the end of the period.
-                    'Average Age': The average age of all workflows at the end of the period.
-                    'Median Age': The median age of all workflows at the end of the period.
+    age_code : str
+        Alias describing how age is measured; currently only ``'D'`` is used.
+    
+    selected_standard_columns : list[str]
+        Four‑element list giving the column names in the workbook; order is
+        ``[
+            'Key',
+            'Title/ Short Description',
+            'Date Started',
+            'Completion Date'
+        ]``.
+        If ``None`` this above default is used.
+    
+    report_title : str, optional
+        Printed heading when ``verbose`` is ``True``.
+    
+    top_n_periods : int, optional
+        When provided, only the most recent *n* completed periods are
+        returned.  This is implemented by slicing the period range instead of
+        relying on arithmetic with ``Period`` objects.
+    
+    verbose : bool
+        If ``True`` the detailed console output and the plot are emitted.
+    
+    week_anchor : str, optional
+        When ``period_code`` is ``'W'``, this value (e.g. ``'MON'`` or
+        ``'SUN'``) will be appended to form the actual frequency string.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Columns: ``['Period','Open at Start','Started During',
+        'Completed During','Open at End','Average Age','Median Age']``.
     """
+
+    if selected_standard_columns is None:
+        selected_standard_columns = ['Key', 'Title/ Short Description',
+                                     'Date Started', 'Completion Date']
+
     if verbose:
-            print(report_title)
-            
-    #Load data
-    file_name = xlsx_file_location
-    df = pd.read_excel(file_name)
-    
-    #Set the table...
+        print(report_title)
+
+    # --- read & normalise data ------------------------------------------------
+    df = pd.read_excel(xlsx_file_location)
+
     standard_column_mapping = {
-        #new:old
-        'ID':selected_standard_columns[0],
-        'Description':selected_standard_columns[1],
-        'Started Datetime (UTC)':selected_standard_columns[2],
-        'Completed Datetime (UTC)':selected_standard_columns[3]
+        'ID': selected_standard_columns[0],
+        'Description': selected_standard_columns[1],
+        'Started Datetime (UTC)': selected_standard_columns[2],
+        'Completed Datetime (UTC)': selected_standard_columns[3]
     }
-    df = df[standard_column_mapping.values()].copy()
+    df = df[list(standard_column_mapping.values())].copy()
     df.columns = standard_column_mapping
-    
-    #ensure dates are in datetime format
+
     df['Started Datetime (UTC)'] = pd.to_datetime(df['Started Datetime (UTC)'])
     df['Completed Datetime (UTC)'] = pd.to_datetime(df['Completed Datetime (UTC)'])
-    
-    #Set period columns
-    df[f'Started Period ({period_code})'] = df['Started Datetime (UTC)'].dt.to_period(period_code)
-    df[f'Completed Period ({period_code})'] = df['Completed Datetime (UTC)'].dt.to_period(period_code)
 
-    #Find Period Range
-    min_period = df[f'Started Period ({period_code})'].min()
-    max_period = max(df[f'Started Period ({period_code})'].max(), df[f'Completed Period ({period_code})'].max())
-    
-    if top_n_periods:
-        min_period = max_period-top_n_periods
-   
-    todays_period = pd.Timestamp.now().to_period(period_code)
-    if todays_period == max_period: 
-        # ... then set max_period to be one less, as we only want to report on completed periods...
-        max_period = max_period - 1
+    # --- build the effective frequency string -------------------------------
+    freq = period_code.upper()
+    if freq == 'W' and week_anchor:
+        freq = f'W-{week_anchor.upper()}'
 
-    #build report variables
-    report_data = {
-        'Period':[],
-        'Open at Start': [],
-        'Started During':[],
-        'Completed During':[],
-        'Open at End':[],
-        'Average Age':[],
-        'Median Age':[]
-    }
-    oldest_workflows = {}
-    fastest_workflows = {}
+    # validate the freq by trying a conversion (pandas will raise if unknown)
+    try:
+        pd.Timestamp.now().to_period(freq)
+    except Exception as exc:  # pragma: no cover - defensive
+        raise ValueError(f"unsupported period_code '{freq}'") from exc
 
-    reporting_periods = pd.period_range(start=min_period, end=max_period, freq=period_code)
-    for reporting_period in reporting_periods:
-        #print(reporting_period) # TEST
+    # add period columns to the dataframe
+    df[f'Started Period ({freq})'] = df['Started Datetime (UTC)'].dt.to_period(freq)
+    df[f'Completed Period ({freq})'] = df['Completed Datetime (UTC)'].dt.to_period(freq)
 
-        #logics
-        start_period_logic = (df[f'Started Period ({period_code})'] <= reporting_period)
-        end_period_logic = ((df[f'Completed Period ({period_code})'] >= reporting_period) | (df[f'Completed Period ({period_code})'].isna()))
+    # --- determine range of completed periods -------------------------------
+    min_period = df[f'Started Period ({freq})'].min()
+    max_period = max(df[f'Started Period ({freq})'].max(),
+                     df[f'Completed Period ({freq})'].max())
 
-        #Find the open workflows
-        open_workflows = df[start_period_logic & end_period_logic].copy()
+    todays_period = pd.Timestamp.now().to_period(freq)
+    reporting_periods = pd.period_range(start=min_period, end=max_period, freq=freq)
 
-        #Adjust the completed dates that are older (or still open) to be the end of the period date
+    # drop the current (incomplete) period if present
+    if len(reporting_periods) and reporting_periods[-1] == todays_period:
+        reporting_periods = reporting_periods[:-1]
+
+    if top_n_periods is not None:
+        reporting_periods = reporting_periods[-top_n_periods:]
+
+    # --- accumulate metrics --------------------------------------------------
+    report_data = {k: [] for k in ['Period', 'Open at Start', 'Started During',
+                                   'Completed During', 'Open at End',
+                                   'Average Age', 'Median Age']}
+
+    for rp in reporting_periods:
+        start_dt = rp.start_time
+        end_dt = rp.end_time
+
+        start_logic = df[f'Started Period ({freq})'] <= rp
+        end_logic = ((df[f'Completed Period ({freq})'] >= rp) |
+                     df[f'Completed Period ({freq})'].isna())
+
+        open_workflows = df[start_logic & end_logic].copy()
         open_workflows['Last Open Date in Period'] = open_workflows['Completed Datetime (UTC)']
-        open_workflows.loc[end_period_logic,'Last Open Date in Period'] = reporting_period.end_time
+        open_workflows.loc[end_logic, 'Last Open Date in Period'] = end_dt
+        open_workflows['Age (days)'] = (
+            open_workflows['Last Open Date in Period'] -
+            open_workflows['Started Datetime (UTC)']).dt.days
+        open_workflows['ID: Description'] = (
+            open_workflows['ID'] + ': ' + open_workflows['Description'])
 
-        #Determine age of each workflow in Period
-        open_workflows['Age (days)'] = (open_workflows['Last Open Date in Period'] - open_workflows['Started Datetime (UTC)']).dt.days
-
-        #Make a full description column
-        open_workflows['ID: Description'] = open_workflows['ID']+": "+ open_workflows['Description']
-        
         if verbose:
-            #print the following:
-            #    -Oldest Workflow that was closed
-            #    -Oldest Workflow that remains open
-            #    -Fastest / youngest Worklflow closed
-            
-            print_data = {
-                '':[],
-                'Workflow':[],
-                'Age (days)':[]
-            }
-            
-            print()
-            print(f'Key Workflows at the end of Period {reporting_period}:')
-            
-            #Oldest Workflow that was closed IN THE PERIOD
-            filtered = open_workflows[open_workflows[f'Completed Period ({period_code})'] == reporting_period]
-            filtered = filtered[filtered['Age (days)'] == filtered['Age (days)'].max()]
-            [print_data[''].append("Oldest Workflow Closed:") for x in range(0,len(filtered))]
-            #print_data[''].append(("Oldest Workflow Closed:")*len(filtered))
-            [print_data['Workflow'].append(x) for x in filtered['ID: Description']]
-            [print_data['Age (days)'].append(x) for x in filtered['Age (days)']]
-            
-            #print_data['Workflow'].append(filtered['ID: Description'])
-            #print_data['Age (days)'].append(filtered['Age (days)'])
-            
-            #Oldest Workflow that remains open
-            filtered = open_workflows[(open_workflows[f'Completed Period ({period_code})'] > reporting_period) | 
-                                      (open_workflows[f'Completed Period ({period_code})'].isna())
-                                     ]
-            filtered = filtered[filtered['Age (days)'] == filtered['Age (days)'].max()]
-            [print_data[''].append("Oldest Workflow Remaining Open:") for x in range(0,len(filtered))]
-            #print_data[''].append(("Oldest Workflow Remaining Open:")*len(filtered))
-            [print_data['Workflow'].append(x) for x in filtered['ID: Description']]
-            [print_data['Age (days)'].append(x) for x in filtered['Age (days)']]
-            
-            #Fastest / youngest Worklflow closed
-            filtered = open_workflows[open_workflows[f'Completed Period ({period_code})'] == reporting_period]
-            filtered = filtered[filtered['Age (days)'] == filtered['Age (days)'].min()]
-            [print_data[''].append("Fastest / Youngest Workflow Closed:") for x in range(0,len(filtered))]
-            [print_data['Workflow'].append(x) for x in filtered['ID: Description']]
-            [print_data['Age (days)'].append(x) for x in filtered['Age (days)']]
-            
-            print_df = pd.DataFrame(print_data)
-            print(tabulate(print_df, 
-                           headers = "keys", 
-                           tablefmt="grid", 
-                           maxcolwidths=[20,60,None],
-                           showindex=False
-                          )
-                 )
-        
-        #Fill in df Report Data
-        report_data['Period'].append(
-            reporting_period
-        )
+            _print_verbose_period(rp, open_workflows, freq)
+
+        report_data['Period'].append(rp)
         report_data['Open at Start'].append(
-            len(open_workflows[open_workflows['Started Datetime (UTC)'] < reporting_period.start_time])
-        )
+            len(open_workflows[open_workflows['Started Datetime (UTC)'] < start_dt]))
         report_data['Started During'].append(
-            len(open_workflows[open_workflows['Started Datetime (UTC)'] >= reporting_period.start_time])
-        )
+            len(open_workflows[open_workflows['Started Datetime (UTC)'] >= start_dt]))
         report_data['Completed During'].append(
-            len(open_workflows[open_workflows['Completed Datetime (UTC)'] <= reporting_period.end_time])
-        )
+            len(open_workflows[open_workflows['Completed Datetime (UTC)'] <= end_dt]))
         report_data['Open at End'].append(
-            len(open_workflows[((open_workflows[f'Completed Period ({period_code})'] > reporting_period) | 
-                 (open_workflows[f'Completed Period ({period_code})'].isna()))])
-        )
-        report_data['Average Age'].append(
-            round(open_workflows['Age (days)'].mean(),0)
-        )
-        report_data['Median Age'].append(
-            open_workflows['Age (days)'].median()
-        )    
+            len(open_workflows[((open_workflows[f'Completed Period ({freq})'] > rp) |
+                               open_workflows[f'Completed Period ({freq})'].isna())]))
+        report_data['Average Age'].append(round(open_workflows['Age (days)'].mean(), 0))
+        report_data['Median Age'].append(open_workflows['Age (days)'].median())
 
     report_df = pd.DataFrame(report_data)
-    
+
     if verbose:
         plot_period_workflow_metrics(report_df, report_title)
 
-    #report_df['CHECK'] = report_df['Open at Start']+report_df['Started During']-report_df['Completed During']
-    return(report_df)
+    return report_df
+
+
+def _print_verbose_period(reporting_period, open_workflows, freq):
+    """Helper used by :func:`period_workflows_reporter` for verbose output."""
+    print()
+    print(f'Key Workflows at the end of Period {reporting_period}:')
+    print_data = {'': [], 'Workflow': [], 'Age (days)': []}
+
+    # oldest closed
+    filt = open_workflows[open_workflows[f'Completed Period ({freq})'] == reporting_period]
+    if not filt.empty:
+        oldest = filt[filt['Age (days)'] == filt['Age (days)'].max()]
+        for _, row in oldest.iterrows():
+            print_data[''].append('Oldest Workflow Closed:')
+            print_data['Workflow'].append(row['ID: Description'])
+            print_data['Age (days)'].append(row['Age (days)'])
+
+    # oldest still open
+    filt = open_workflows[((open_workflows[f'Completed Period ({freq})'] > reporting_period) |
+                           open_workflows[f'Completed Period ({freq})'].isna())]
+    if not filt.empty:
+        oldest = filt[filt['Age (days)'] == filt['Age (days)'].max()]
+        for _, row in oldest.iterrows():
+            print_data[''].append('Oldest Workflow Remaining Open:')
+            print_data['Workflow'].append(row['ID: Description'])
+            print_data['Age (days)'].append(row['Age (days)'])
+
+    # fastest closed
+    filt = open_workflows[open_workflows[f'Completed Period ({freq})'] == reporting_period]
+    if not filt.empty:
+        youngest = filt[filt['Age (days)'] == filt['Age (days)'].min()]
+        for _, row in youngest.iterrows():
+            print_data[''].append('Fastest / Youngest Workflow Closed:')
+            print_data['Workflow'].append(row['ID: Description'])
+            print_data['Age (days)'].append(row['Age (days)'])
+
+    print(tabulate(pd.DataFrame(print_data),
+                   headers='keys',
+                   tablefmt='grid',
+                   maxcolwidths=[20, 60, None],
+                   showindex=False))
     
