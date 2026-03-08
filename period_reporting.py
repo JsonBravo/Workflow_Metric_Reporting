@@ -173,7 +173,7 @@ def period_workflows_reporter(
                                    'Completed During', 'Open at End',
                                    'Average Age', 'Median Age']}
 
-    for rp in reporting_periods:
+    for i,rp in enumerate(reporting_periods):
         start_dt = rp.start_time
         end_dt = rp.end_time
 
@@ -192,6 +192,8 @@ def period_workflows_reporter(
 
         if verbose:
             _print_verbose_period(rp, open_workflows, freq)
+            # also dump full lists of completed and still‑open workflows for this period
+            _print_verbose_status_lists(rp, open_workflows, freq)
 
         report_data['Period'].append(rp)
         report_data['Open at Start'].append(
@@ -215,7 +217,11 @@ def period_workflows_reporter(
 
 
 def _print_verbose_period(reporting_period, open_workflows, freq):
-    """Helper used by :func:`period_workflows_reporter` for verbose output."""
+    """Helper used by :func:`period_workflows_reporter` for verbose output.
+
+    The existing implementation reports a small set of interesting workflows
+    (oldest closed, oldest still open, fastest closed) in a compact table.
+    """
     print()
     print(f'Key Workflows at the end of Period {reporting_period}:')
     print_data = {'': [], 'Workflow': [], 'Age (days)': []}
@@ -253,4 +259,49 @@ def _print_verbose_period(reporting_period, open_workflows, freq):
                    tablefmt='grid',
                    maxcolwidths=[20, 60, None],
                    showindex=False))
+
+
+def _print_verbose_status_lists(reporting_period, open_workflows, freq):
+    """Print a detailed list of all workflows split by status.
+
+    The first section contains workflows that completed within the
+    ``reporting_period``; the second section shows those which remain open
+    (either completing in a later period or with a missing completion date).
+    This is useful for debugging or when the caller wants the full dataset
+    rather than just the summary rows produced by :func:`_print_verbose_period`.
+    """
+    print()
+    print(f'All workflows for Period {reporting_period}:')
+
+    completed = open_workflows[open_workflows[f'Completed Period ({freq})'] == reporting_period].copy()
+    if not completed.empty:
+        completed["Completed Date"] = completed["Completed Datetime (UTC)"].dt.strftime('%Y-%m-%d')
+        completed = completed.sort_values('Completed Datetime (UTC)')
+        print('Completed workflows:')
+        print(tabulate(
+            completed[['ID: Description', 'Completed Date', 'Age (days)']],
+            headers=['Workflow', 'Completed Date', 'Age (days)'],
+            tablefmt='grid',
+            showindex=False,
+            maxcolwidths=[60, None]
+        ))
+    else:
+        print('No workflows completed during this period.')
+
+    still_open = open_workflows[((open_workflows[f'Completed Period ({freq})'] > reporting_period) |
+                                open_workflows[f'Completed Period ({freq})'].isna())].copy()
+    if not still_open.empty:
+        still_open["Started Date"] = still_open["Started Datetime (UTC)"].dt.strftime('%Y-%m-%d')
+        still_open = still_open.sort_values('Started Datetime (UTC)')
+        print('\nStill-open workflows:')
+        print(tabulate(
+            still_open[['ID: Description', 'Started Date', 'Age (days)']],
+            headers=['Workflow', 'Started Date', 'Age (days)'],
+            tablefmt='grid',
+            showindex=False,
+            maxcolwidths=[60, None]
+        ))
+    else:
+        print('No workflows remain open at end of this period.')
+
     
