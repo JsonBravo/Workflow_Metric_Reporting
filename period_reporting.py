@@ -51,7 +51,8 @@ def period_workflows_reporter(
     report_title=None,
     top_n_periods=None,
     verbose=True,
-    week_anchor='MON'            # optional day name to anchor weeks when using 'W'
+    week_anchor='MON',            # optional day name to anchor weeks when using 'W'
+    include_current_period=False
 ):
     """
     This is a period workflow reporting function able to handle arbitrary time periods.
@@ -159,11 +160,15 @@ def period_workflows_reporter(
                      df[f'Completed Period ({freq})'].max())
 
     todays_period = pd.Timestamp.now().to_period(freq)
+    if (include_current_period):
+        max_period = max(max_period, todays_period)
+        
     reporting_periods = pd.period_range(start=min_period, end=max_period, freq=freq)
 
-    # drop the current (incomplete) period if present
-    if len(reporting_periods) and reporting_periods[-1] == todays_period:
-        reporting_periods = reporting_periods[:-1]
+    if (include_current_period == False):
+        # drop the current (incomplete) period if present
+        if len(reporting_periods) and reporting_periods[-1] == todays_period:
+            reporting_periods = reporting_periods[:-1]
 
     if top_n_periods is not None:
         reporting_periods = reporting_periods[-top_n_periods:]
@@ -193,7 +198,8 @@ def period_workflows_reporter(
         if verbose:
             _print_verbose_period(rp, open_workflows, freq)
             # also dump full lists of completed and still‑open workflows for this period
-            _print_verbose_status_lists(rp, open_workflows, freq)
+            if(i==len(reporting_periods)-1):  # only print the full lists for the most recent period to avoid overwhelming the console
+                _print_verbose_status_lists(rp, open_workflows, freq)
 
         report_data['Period'].append(rp)
         report_data['Open at Start'].append(
