@@ -44,7 +44,7 @@ def plot_period_workflow_metrics(df, workflow_type = '[Describe]', period_variab
     plt.show()
 
 def period_workflows_reporter(
-    xlsx_file_location='.',
+    df = False,                  # [OUTDATED] >> xlsx_file_location='.',
     period_code='Q',             # pandas frequency alias (e.g. 'D','W','W-MON','M','Q','Y',etc.)
     age_code='D',
     selected_standard_columns=None,
@@ -63,7 +63,7 @@ def period_workflows_reporter(
 
     Parameters
     ----------
-    xlsx_file_location : str
+    [OUTDATED] xlsx_file_location : str << CHANGED TO FEED JUST a DF instead ... read in a file from your main, not from this method...
         Path to the Excel workbook containing references to the four standard columns 
         (order of the references matter)
             1. ``Key``
@@ -71,7 +71,17 @@ def period_workflows_reporter(
             3. ``Date Started``
             4. ``Completion Date``
         If ``selected_standard_columns`` is omitted it defaults to this list (see below).
-    
+
+    `df : Pandas DataFrame
+        a pandas dataframe containing referenced four standard columns 
+        (order of the references matter)
+            1. ``Key``
+            2. ``Title/ Short Description``
+            3. ``Date Started``
+            4. ``Completion Date``
+            5. [OTHERS] - if any other columns, make sure they are after the 4th column
+        If ``selected_standard_columns`` is omitted it defaults to this list (see below).`
+        
     period_code : str
         Pandas frequency alias used for ``.dt.to_period()``.  
         Examples:
@@ -123,9 +133,6 @@ def period_workflows_reporter(
 
     if verbose:
         print(report_title)
-
-    # --- read & normalise data ------------------------------------------------
-    df = pd.read_excel(xlsx_file_location)
 
     standard_column_mapping = {
         'ID': selected_standard_columns[0],
