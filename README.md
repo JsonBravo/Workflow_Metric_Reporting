@@ -13,12 +13,7 @@ Input (Excel Spreadsheet): <br>
 <br><br>
 
 Script (see `period_reporting_notebook`): <br>
-<img width="984" height="171" alt="image" src="https://github.com/user-attachments/assets/52c3b5e9-cbe2-4fd0-8127-9204f02f265a" />
- <br>
-`file_location = xlsx_files[0]` <br>
-`report_title = "Mock General Issues"` <br>
-`select_columns = ['Workflow ID','Workflow Description','Start Datetime','Completed Datetime']` <br>
-`df = pr.period_workflows_reporter(file_location, selected_standard_columns = select_columns, report_title=report_title)` <br>
+See 'period_reporting_notebook.ipynb'
 <br>
 
 Output (see `period_reporting_notebook`): <br>
